@@ -1,0 +1,78 @@
+import requests
+import smartsheet
+import pandas as pd
+import psycopg2
+import openpyxl
+import json
+
+# Must replace instances of "ENTER" in the Global Variables. See Read Me for more details.
+
+###  GLOBAL VARIABLES   ###
+
+API_TOKEN = "ENTER"                 
+SHEET_ID = "ENTER"   
+EXCEL_FILEPATH ="ENTER"         # enter you full windows filepath, eg   "C:\Users\yourid\Desktop\yourfile.xlsx"
+
+### SMARTSHEET AUTHENTICATION ###
+    
+ss = smartsheet.Smartsheet(API_TOKEN)
+                                                     
+###  FUNCTIONS   ###
+
+def excel_df():
+    #Update the filepath for your file if you wish to upload an excel sheet.
+    df_rd = pd.read_excel(r'str(EXCEL_FILEPATH)')
+    df = pd.DataFrame(df_rd)
+    return df
+
+
+def clear_sheet(sheet_id, chunk_interval=300):
+    #Removes all cell data from a given sheet, while preserving columns, etc.
+    sheet_data = ss.Sheets.get_sheet(sheet_id)
+    del_tbl = json.loads(str(sheet_data)) 
+
+    del_row_ids = []                                                  
+    
+    for i, rows in enumerate(del_tbl['rows']):
+        del_row_ids.append(del_tbl['rows'][i]['id'])                  
+
+    if len(del_row_ids)<1:                                               #checks if there are any rows to delete
+        print("No rows to delete!")
+    else:
+        for x in range(0, len(del_row_ids), chunk_interval):
+            ss.Sheets.delete_rows(sheet_id, del_row_ids[x:x + chunk_interval])      
+
+def append_df(df, sheet_id, parent_row, chunk_interval=300):
+    # appends sheet with df -- note that the cell value is wrapped in a string function
+
+    list_of_rows = []   
+    list_of_columns = []
+
+    for c, column in enumerate(df):                      # done here to limit Smartsheet server hits
+        list_of_columns.append(ss.Sheets.get_columns(sheet_id, include_all=True).data[c].id)
+
+    for i, rows in df.iterrows():      
+        temp_row = ss.models.Row()     
+        temp_row.to_bottom = True
+        for j, columns in enumerate(df):      
+            temp_row.cells.append({
+                'column_id': list_of_columns[j],   
+                'value': str(df.iat[i,j])                                              #String function used to eliminate load errors
+            })
+        list_of_rows.append(temp_row)                                       
+
+    for x in range(0, len(list_of_rows), chunk_interval):
+        ss.Sheets.add_rows(sheet_id, list_of_rows[x:x + chunk_interval])   
+        
+
+###  CALLING THE FUNCTIONS   ###
+
+df = excel_df()
+print("Dataframe captured")
+
+clear_sheet(SHEET_ID)
+print("Sheet cleared of old content")
+
+append_df(df, SHEET_ID, 1000)
+print("New content appended")
+
