@@ -20,7 +20,6 @@ ss = smartsheet.Smartsheet(API_TOKEN)
 ###  FUNCTIONS   ###
 
 def excel_df():
-    #Update the filepath for your file if you wish to upload an excel sheet.
     df_rd = pd.read_excel(r'str(EXCEL_FILEPATH)')
     df = pd.DataFrame(df_rd)
     return df
