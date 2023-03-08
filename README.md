@@ -1,6 +1,14 @@
 # smartsheet_replace-sheet-content-python
+Read below and test this code before working on valuable data!
+
 This is Python application to update a sheet in Smartsheet using an Excel file. I'm new to Python, but I wrote this to be simple
-to run--you should be able to get going by just updating the global variables, but read below before you start.
+to run--you should be able to get going by updating three global variables (API_TOKEN, SHEET_ID, and EXCEL_FILEPATH). However, 
+read below before you start. I use this to create and update databases in Smartsheet, not to load information directly into pretty
+pages. I source the data from my databases in my pretty pages. If you're just getting started, I strongly recommend loading data
+as strings (as this code is natively written) with null values in all your Excel blank cells. It is easier to use helper columns 
+in Smartsheet to clean the data than it is to figure out how to write code to clean the data. 
+
+But you be you :)
 
 Summary Notes:
   - code deletes all current content from the sheet (preserving the headers) and updates with the content from the Excel file
