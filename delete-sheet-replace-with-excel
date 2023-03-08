@@ -1,7 +1,6 @@
 import requests
 import smartsheet
 import pandas as pd
-import psycopg2
 import openpyxl
 import json
 
